@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica 9 - Voz a texto y texto a voz</title>
+
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
+  textarea { width: 100%; height: 140px; font-size: 1rem; padding: 8px; box-sizing: border-box; }
+  .botones { display: flex; gap: 8px; margin: 12px 0; }
+  button { flex: 1; font-size: 1rem; padding: 10px; border: 0; border-radius: 6px; color: #fff; cursor: pointer; }
+  #btnEscuchar { background: #2e7d32; }
+  #btnReproducir { background: #1565c0; }
+  #btnDetener { background: #c62828; }
+  #estado { color: #555; min-height: 1.5em; }
+  footer { margin-top: 40px; font-size: .8rem; color: #666; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>Voz a texto y texto a voz</h1>
+  <textarea id="texto" placeholder="Escribe o pulsa Escuchar y habla..."></textarea>
+  <div class="botones">
+    <button id="btnEscuchar">Escuchar</button>
+    <button id="btnReproducir">Reproducir</button>
+    <button id="btnDetener">Detener</button>
+  </div>
+  <p id="estado"></p>
+
+  <footer>Ramírez MArtínez Juan Antonio · B. 2023640835 ·Práctica 9</footer>
+
+<script>
+const IDIOMA = "es-MX";                       
+const cuadro = document.getElementById("texto");
+const estado = document.getElementById("estado");
+function escuchar() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { estado.textContent = "Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge."; return; }
+  const rec = new SR();
+  rec.lang = IDIOMA;
+  rec.onstart = () => estado.textContent = "Escuchando...";         
+  rec.onresult = (e) => {
+    cuadro.value = e.results[0][0].transcript; 
+    estado.textContent = "Texto reconocido.";            
+  };
+  rec.onerror = (e) => estado.textContent = "Error: " + e.error;
+  rec.onend = () => { if (estado.textContent === "Escuchando...") estado.textContent = ""; };
+  rec.start();
+}
+
+function reproducir() {
+  const mensaje = cuadro.value.trim();
+  if (!mensaje) { estado.textContent = "No hay texto para reproducir."; return; } 
+  window.speechSynthesis.cancel();
+  const voz = new SpeechSynthesisUtterance(mensaje);
+  voz.lang = IDIOMA;
+  window.speechSynthesis.speak(voz);
+  estado.textContent = "Reproduciendo...";                     
+}
+
+function detener() {
+  window.speechSynthesis.cancel();
+  estado.textContent = "";
+}
+
+document.getElementById("btnEscuchar").addEventListener("click", escuchar);
+document.getElementById("btnReproducir").addEventListener("click", reproducir);
+document.getElementById("btnDetener").addEventListener("click", detener);
+</script>
+</body>
+</html>

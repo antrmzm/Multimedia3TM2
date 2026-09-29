@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Práctica 7 - Asistente de voz</title>
+
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 520px; margin: 40px auto; text-align: center; }
+  button { font-size: 1rem; padding: 10px 24px; cursor: pointer; }
+  #texto, #respuesta { margin: 16px 0; min-height: 1.5em; }
+  footer { margin-top: 40px; font-size: .8rem; color: #666; }
+</style>
+</head>
+<body>
+  <h1>Asistente de voz</h1>
+  <button id="btnHablar">Hablar</button>
+  <p id="texto">Dijiste: —</p>
+  <p id="respuesta">Respuesta: —</p>
+
+
+  <footer>Ramírez Martínez Juan Antonio · B. 2023640835 · Práctica 7</footer>
+
+<script>
+const IDIOMA = "es-MX";                
+
+
+function hablar(mensaje) {
+  window.speechSynthesis.cancel();
+  const voz = new SpeechSynthesisUtterance(mensaje);
+  voz.lang = IDIOMA;
+  window.speechSynthesis.speak(voz);
+  document.getElementById("respuesta").textContent = "Respuesta: " + mensaje;
+}
+
+function procesar(transcript) {
+  transcript = transcript.toLowerCase();
+  if (transcript.includes("hola")) {
+    hablar("Hola, ¿en qué te puedo ayudar?");
+
+  } else if (transcript.includes("hora")) {         
+    const ahora = new Date();
+    const hora = ahora.toLocaleTimeString(IDIOMA);
+    hablar("Son las " + hora);                      
+
+  } else {
+    hablar("No entendí, intenta de nuevo.");       
+  }
+}
+
+
+function escuchar() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge."); return; }
+  const rec = new SR();
+  rec.lang = IDIOMA;
+  rec.onresult = (e) => {
+    const dicho = e.results[0][0].transcript;
+    document.getElementById("texto").textContent = "Dijiste: " + dicho;
+    procesar(dicho);
+  };
+  rec.onerror = (e) => hablar("Ocurrió un error: " + e.error);
+  rec.start();
+}
+
+document.getElementById("btnHablar").addEventListener("click", escuchar);
+</script>
+</body>
+</html>

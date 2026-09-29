@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Práctica - Palabras clave</title>
+
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 520px; margin: 40px auto; text-align: center; }
+  button { font-size: 1rem; padding: 10px 24px; cursor: pointer; }
+  #texto, #respuesta { margin: 16px 0; min-height: 1.5em; }
+  footer { margin-top: 40px; font-size: .8rem; color: #666; }
+</style>
+</head>
+<body>
+  <h1>Asistente de voz</h1>
+  <button id="btnHablar">Hablar</button>
+  <p id="texto">Dijiste: —</p>
+  <p id="respuesta">Respuesta: —</p>
+
+  <!-- CAMBIAR (2): datos del alumno -->
+  <footer>Ramírez Martínez Juan ANtonio  |  B. 2023640835</footer>
+
+<script>
+const IDIOMA = "es-MX";
+
+function hablar(mensaje) {
+  window.speechSynthesis.cancel();
+  const voz = new SpeechSynthesisUtterance(mensaje);
+  voz.lang = IDIOMA;
+  window.speechSynthesis.speak(voz);
+  document.getElementById("respuesta").textContent = "Respuesta: " + mensaje;
+}
+
+function procesar(transcript) {
+  transcript = transcript.toLowerCase();
+
+  // ===== CASO 1 =====
+  if (transcript.includes("hola")) {                         
+    hablar("Hola, soy tu asistente. ¿Qué necesitas?");      
+  } else if (transcript.includes("clima")) {                  
+    hablar("Abriendo el clima.");                           
+    window.open("https://www.google.com/search?q=clima", "_blank"); 
+
+  // ===== CASO 4 =====
+  } else if (transcript.includes("canción")) {              
+    hablar("Reproduciendo tu canción.");                    
+    window.open("https://www.youtube.com/watch?v=wb0fW8yQCHc&list=RDwb0fW8yQCHc&start_radio=1", "_blank");  
+
+  } else {
+    hablar("No entendí, intenta de nuevo.");                 
+  }
+}
+
+function escuchar() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge."); return; }
+  const rec = new SR();
+  rec.lang = IDIOMA;
+  rec.onresult = (e) => {
+    const dicho = e.results[0][0].transcript;
+    document.getElementById("texto").textContent = "Dijiste: " + dicho;
+    procesar(dicho);
+  };
+  rec.onerror = (e) => hablar("Ocurrió un error: " + e.error);
+  rec.start();
+}
+
+document.getElementById("btnHablar").addEventListener("click", escuchar);
+</script>
+</body>
+</html>
